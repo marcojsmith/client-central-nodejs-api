@@ -4,6 +4,8 @@
 - Node.js
 - Axios for HTTP requests
 - Dotenv for configuration
+- NeonDB
+- node-cron
 
 ## Dependencies
 - API token authentication
