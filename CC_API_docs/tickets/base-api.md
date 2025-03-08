@@ -18,14 +18,22 @@ A ticket is represented as a JSON object with the following structure:
 
 ```json
 {
-  "id": 123,
-  "subject": "Example Ticket",
-  "description": "This is an example ticket",
-  "status": "open",
-  "priority": "normal",
-  "created_at": "2025-03-07T12:00:00Z",
-  "updated_at": "2025-03-07T12:00:00Z",
-  "tags": ["example", "demo"]
+  "ticketId": 571864,
+  "ticketDescription": "Review Employees with Leave recalculation issues",
+  "owner": 12973,
+  "ownerName": "System Administrator",
+  "assignee": 12973,
+  "assigneeName": "System Administrator",
+  "relatedModule": "Employee Central Time Tracking & Time Off",
+  "status": "In Progress",
+  "priority": "High",
+  "statusId": 61,
+  "priorityId": 11,
+  "ticketType": 23,
+  "account": 5398,
+  "accountName": "Allan Gray Proprietary Limited",
+  "created_at": "2024-12-05T11:00:39+02:00",
+  "updated_at": "2025-03-08T02:11:28+02:00"
 }
 ```
 
@@ -33,14 +41,17 @@ A ticket is represented as a JSON object with the following structure:
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `id` | integer | Unique identifier |
-| `subject` | string | Ticket subject |
-| `description` | string | Ticket description |
-| `status` | string | Current status (open/closed) |
-| `priority` | string | Priority level (low/normal/high) |
+| `ticketId` | integer | Unique identifier |
+| `ticketDescription` | string | Ticket subject |
+| `customer_user` | integer | Ticket owner user ID |
+| `assignee` | integer | Ticket assignee user ID |
+| `relatedModule` | string | Related module name |
+| `statusId` | integer | Current status ID |
+| `priorityId` | integer | Priority level ID |
+| `ticketType` | integer | Ticket type ID |
+| `account` | integer | Account ID |
 | `created_at` | datetime | Creation timestamp |
 | `updated_at` | datetime | Last update timestamp |
-| `tags` | array | List of tags |
 
 ## Creating Tickets
 
