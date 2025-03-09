@@ -20,16 +20,20 @@ class ApiClient {
   }
 
   // Get list of tickets
-  async getTickets(page, workspaceId) {
+  async getTickets(page, queryParams = {}) {
     try {
-      const response = await this.client.get('/api/v1/tickets.json', {
-        params: {
-          page, // Page number
-          // Select all fields
-          select: 'description,status.name,priority.name,status.id,priority.id,id,subject,customer_user.name,customer_user.id,created_by_user.id,assignee.name,account.name,assignee.id,account.id,related_module.name,related_module.id,type.name,type.id,created_at,updated_at',
-          ...(workspaceId ? { workspace_id: workspaceId } : {}) // Conditionally add workspace_id
-        }
-      });
+      const params = {
+        page: page, // Page number
+        workspace: config.server.workspaceIdFilter, // workspaceId filter
+        ...queryParams, // Merge queryParams
+        select: 'description,status.name,priority.name,status.id,priority.id,id,subject,customer_user.name,customer_user.id,created_by_user.id,assignee.name,account.name,assignee.id,account.id,related_module.name,related_module.id,type.name,type.id,created_at,updated_at',
+      };
+
+
+      const url = '/api/v1/tickets.json?';
+      const fullUrl = this.client.defaults.baseURL + url + new URLSearchParams(params).toString();
+      console.log('API Request URL:', fullUrl); // Log the full URL
+      const response = await this.client.get(url, { params });
 
       // Extract pagination information from response data
       const pagination = {
@@ -40,7 +44,7 @@ class ApiClient {
 
       console.log('Pagination Info:', pagination); // Log pagination information
 
-      return response.data;
+      return response.data
     } catch (error) {
       console.error('Error getting tickets:', error);
       throw new Error('Failed to get tickets');
@@ -65,7 +69,7 @@ class ApiClient {
 
   // Get details of a specific ticket
   async getTicketById(id, workspaceId) {
-    return this._fetchTicketDetails(id, workspaceId, { select: 'description,status.name,priority.name,status.id,priority.id,id,subject,customer_user.name,customer_user.id,created_by_user.id,assignee.name,account.name,assignee.id,account.id,related_module.name,related_module.id,type.name,type.id,created_at,updated_at' });
+    return this._fetchTicketDetails(id, workspaceId, {  select: 'description,status.name,priority.name,status.id,priority.id,id,subject,customer_user.name,customer_user.id,created_by_user.id,assignee.name,account.name,assignee.id,account.id,related_module.name,related_module.id,type.name,type.id,created_at,updated_at' });
   }
 
   // Get details of a specific ticket with all fields

@@ -17,10 +17,10 @@ app.use(express.json());
 // GET endpoint for listing tickets
 app.get('/api/v1/tickets', async (req, res) => {
   try {
-    const { page = 2 } = req.query;
+    const { page = 1,  ...queryParams } = req.query; // Extract page and queryParams
     // Get list of tickets from API
-    const fullTickets = await apiClient.getTickets(page, config.server.workspaceIdFilter);
-    // Extract required fields for each ticket
+    const fullTickets = await apiClient.getTickets(page, queryParams);
+    // Extract required fields for each ticket from .data
     const tickets = fullTickets.data.map(fullTicket => {
       return {
         ticketId: fullTicket.id,
@@ -81,7 +81,6 @@ app.get('/api/v1/tickets/:id', async (req, res) => {
     res.json(apiFullTicket.data);
   } catch (error) {
     console.error('Error getting ticket details:', error);
-    console.error('Detailed error:', error); // Log detailed error
     res.status(500).json({ error: 'Failed to get ticket details' });
   }
 });
