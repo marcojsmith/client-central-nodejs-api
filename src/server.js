@@ -19,7 +19,7 @@ app.get('/api/v1/tickets', async (req, res) => {
   try {
     const { page = 2 } = req.query;
     // Get list of tickets from API
-    const fullTickets = await apiClient.getTickets(page);
+    const fullTickets = await apiClient.getTickets(page, config.server.workspaceIdFilter);
     // Extract required fields for each ticket
     const tickets = fullTickets.data.map(fullTicket => {
       return {
@@ -55,36 +55,50 @@ app.get('/api/v1/tickets', async (req, res) => {
 app.get('/api/v1/tickets/:id', async (req, res) => {
   try {
     console.log('Request received for ticket ID:', req.params.id); // Log request parameters
-    const fullTicket = await apiClient.getTicketById(req.params.id);
+    const apiFullTicket = await apiClient.getTicketById(req.params.id, config.server.workspaceIdFilter);
     // Extract only the required fields
-    const ticket = {
-      ticketId: fullTicket.data.id,
-      ticketDescription: fullTicket.data.description, // Corrected to description
-      ticketSubject: fullTicket.data.subject, // ADDED: ticketSubject field
-      owner: fullTicket.data.customer_user.id,
-      ownerName: fullTicket.data.customer_user.name,
-      assignee: fullTicket.data.assignee.id,
-      assigneeName: fullTicket.data.assignee.name,
-      relatedModule: fullTicket.data.related_module.name, // Added relatedModule
-      status: fullTicket.data.status.name,
-      priority: fullTicket.data.priority.name,
-      statusId: fullTicket.data.status?.id, // Use optional chaining
-      priorityId: fullTicket.data.priority?.id, // Use optional chaining
-      accountName: fullTicket.data.account.name,
-      ticketType: fullTicket.data.type?.name, // Corrected to type?.name
-      ticketTypeId: fullTicket.data.type?.id, // Added ticketType id
-      relatedModuleId: fullTicket.data.related_module.id, // Added relatedModule id
-      account: fullTicket.data.account.id,
-      createdAt: fullTicket.data.created_at, // Added created_at
-      updatedAt: fullTicket.data.updated_at, // Added updated_at
-    };
-    res.json(ticket);
+    /* const ticket = {
+      ticketId: apiFullTicket.data.id,
+      ticketDescription: apiFullTicket.data.description, // Corrected to description
+      ticketSubject: apiFullTicket.data.subject, // ADDED: ticketSubject field
+      owner: apiFullTicket.data.customer_user.id,
+      ownerName: apiFullTicket.data.customer_user.name,
+      assignee: apiFullTicket.data.assignee.id,
+      assigneeName: apiFullTicket.data.assignee.name,
+      relatedModule: apiFullTicket.data.related_module.name, // Added relatedModule
+      status: apiFullTicket.data.status.name,
+      priority: apiFullTicket.data.priority.name,
+      statusId: apiFullTicket.data.status?.id, // Use optional chaining
+      priorityId: apiFullTicket.data.priority?.id, // Use optional chaining
+      accountName: apiFullTicket.data.account.name,
+      ticketType: apiFullTicket.data.type?.name, // Corrected to type?.name
+      ticketTypeId: apiFullTicket.data.type?.id, // Added ticketType id
+      relatedModuleId: apiFullTicket.data.related_module.id, // Added relatedModule id
+      account: apiFullTicket.data.account.id,
+      createdAt: apiFullTicket.data.created_at, // Added created_at
+      updatedAt: apiFullTicket.data.updated_at, // Added updated_at
+    }; */
+    res.json(apiFullTicket.data);
   } catch (error) {
     console.error('Error getting ticket details:', error);
     console.error('Detailed error:', error); // Log detailed error
     res.status(500).json({ error: 'Failed to get ticket details' });
   }
 });
+
+// GET endpoint for getting full ticket details
+app.get('/api/v1/tickets/:id/full', async (req, res) => {
+  try {
+    console.log('Request received for full ticket details ID:', req.params.id); // Log request parameters
+    const fullTicket = await apiClient.getAllTicketFieldsById(req.params.id, config.server.workspaceIdFilter);
+    res.json(fullTicket.data); // Return all fields
+  } catch (error) {
+    console.error('Error getting full ticket details:', error);
+    console.error('Detailed error:', error); // Log detailed error
+    res.status(500).json({ error: 'Failed to get full ticket details' });
+  }
+});
+
 
 // POST endpoint for creating tickets
 app.post('/api/v1/tickets', async (req, res) => {

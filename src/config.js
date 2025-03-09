@@ -13,6 +13,12 @@ module.exports = {
     cors: {
       allowedOrigins: process.env.CORS_ALLOWED_ORIGINS?.split(',') || ['*']
     }
+,
+      workspaceIdFilter: process.env.WORKSPACE_ID_FILTER
+  },
+  debug: {
+    envWorkspaceIdFilter: process.env.WORKSPACE_ID_FILTER,
+      workspaceIdFilter: process.env.WORKSPACE_ID_FILTER
   },
   statuses: {
     61: 'In Testing'

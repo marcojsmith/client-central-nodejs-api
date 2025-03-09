@@ -1,24 +1,15 @@
 # Active Context
 
-## Current Focus
-- Implementing Neon DB integration
-- Setting up periodic ticket updates
-- Creating new API endpoints for React app
+## Current Task
+Create a new API endpoint that returns all fields for a specific ticket.
 
-## Recent Changes
-- Created Neon DB integration plan
-- Updated progress tracking
+## Plan
+1. Clone the existing `/api/v1/tickets/:id` endpoint in `server.js`.
+2. Modify the new endpoint path to `/api/v1/tickets/:id/full`.
+3. Remove field selection in the new endpoint to return all fields.
+4. Test the new endpoint.
+5. Update API documentation.
+6. Update memory bank.
 
 ## Next Steps
-1. [ ] Prepared database schema design
-2. [ ] Implement Neon DB connection
-3. [ ] Create database schema
-4. [ ] Add periodic fetch job
-5. [ ] Create new endpoints for React app
-6. [ ] Update API documentation
-
-## Decisions
-- Using node-cron for periodic jobs
-- Storing tickets in Neon DB for faster access
-- Maintaining RESTful conventions
-- Using JSON as primary data format
+Implement the new API endpoint in `code` mode.

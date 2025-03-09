@@ -20,13 +20,14 @@ class ApiClient {
   }
 
   // Get list of tickets
-  async getTickets(page) {
+  async getTickets(page, workspaceId) {
     try {
       const response = await this.client.get('/api/v1/tickets.json', {
         params: {
           page, // Page number
           // Select all fields
-          select: 'description,status.name,priority.name,status.id,priority.id,id,subject,customer_user.name,customer_user.id,created_by_user.id,assignee.name,account.name,assignee.id,account.id,related_module.name,related_module.id,type.name,type.id,created_at,updated_at'
+          select: 'description,status.name,priority.name,status.id,priority.id,id,subject,customer_user.name,customer_user.id,created_by_user.id,assignee.name,account.name,assignee.id,account.id,related_module.name,related_module.id,type.name,type.id,created_at,updated_at',
+          ...(workspaceId ? { workspace_id: workspaceId } : {}) // Conditionally add workspace_id
         }
       });
 
@@ -46,31 +47,35 @@ class ApiClient {
     }
   }
 
-  // Get details of a specific ticket
-  async getTicketById(id) {
+  // --- Internal function to fetch ticket details ---
+  async _fetchTicketDetails(id, workspaceId, params = {}) { // params is now optional
     try {
-      const response = await this.client.get(`/api/v1/tickets/${id}.json`, {
-        params: {
-          select: 'description,status.name,priority.name,status.id,priority.id,id,subject,customer_user.name,customer_user.id,created_by_user.id,assignee.name,account.name,assignee.id,account.id,related_module.name,related_module.id,type.name,type.id,created_at,updated_at'
-        }
-      });
+      const requestParams = { ...params }; // Start with any provided params
+      if (workspaceId) {
+        requestParams.workspace_id = workspaceId; // Add workspaceId if provided
+      }
+      const response = await this.client.get(`/api/v1/tickets/${id}.json`, { params: requestParams });
       return response.data;
     } catch (error) {
-      console.error('Error getting ticket details:', error);
-      throw new Error('Failed to get ticket details');
+      console.error('Error fetching ticket details:', error);
+      throw new Error('Failed to fetch ticket details');
     }
   }
 
-  // Create a new ticket
-  async createTicket(ticketData) {
-    try {
-      const response = await this.client.post('/api/v1/tickets.json', { ticket: ticketData });
-      return response.data;
-    } catch (error) {
-      console.error('Error creating ticket:', error);
-      throw new Error('Failed to create ticket');
-    }
+
+  // Get details of a specific ticket
+  async getTicketById(id, workspaceId) {
+    return this._fetchTicketDetails(id, workspaceId, { select: 'description,status.name,priority.name,status.id,priority.id,id,subject,customer_user.name,customer_user.id,created_by_user.id,assignee.name,account.name,assignee.id,account.id,related_module.name,related_module.id,type.name,type.id,created_at,updated_at' });
   }
+
+  // Get details of a specific ticket with all fields
+  async getAllTicketFieldsById(id, workspaceId) {
+    return this._fetchTicketDetails(id, workspaceId);
+  }
+
+
+  // Create a new ticket
+  
 }
 
 module.exports = ApiClient;
