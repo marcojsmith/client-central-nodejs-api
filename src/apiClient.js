@@ -79,7 +79,37 @@ class ApiClient {
 
 
   // Create a new ticket
+  async createTicket(ticketData) {
+    try {
+      const url = '/api/v1/tickets.json';
+      const fullUrl = this.client.defaults.baseURL + url;
+      console.log('API Request URL:', fullUrl); // Log the full URL
+      const response = await this.client.post(url, { ticket: ticketData });
+      return response.data;
+    } catch (error) {
+      console.error('Error creating ticket:', error);
+      throw new Error('Failed to create ticket');
+    }
+  }
+
   
+  // Update an existing ticket (commit)
+  async commitTicket(ticketId, ticketData, comment) {
+    try {
+      const url = `/api/v1/tickets/${ticketId}.json`;
+      const fullUrl = this.client.defaults.baseURL + url;
+      console.log('API Request URL:', fullUrl); // Log the full URL
+      const response = await this.client.put(url, {
+        ticket: ticketData,
+        ticket_event: { description: comment }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error committing ticket:', error);
+      throw new Error('Failed to commit ticket');
+    }
+  }
+
 }
 
 module.exports = ApiClient;

@@ -102,6 +102,35 @@ app.get('/api/v1/tickets/:id/full', async (req, res) => {
 // POST endpoint for creating tickets
 app.post('/api/v1/tickets', async (req, res) => {
   try {
+    // Extract ticket data from the request body
+    const ticketData = req.body;
+
+    // Validate ticket data - ensure ticketData is not empty
+    if (!ticketData || Object.keys(ticketData).length === 0) {
+      return res.status(400).json({ error: 'Ticket data is required in the request body' });
+    }
+
+    // Call apiClient.createTicket to create the ticket
+    const newTicket = await apiClient.createTicket(ticketData);
+
+    // Respond with the newly created ticket data
+    res.status(201).json(newTicket);
+  } catch (error) {
+    console.error('Error creating ticket:', error);
+    // Handle specific error types if needed, otherwise, send a generic error response
+    res.status(500).json({ error: 'Failed to create ticket', details: error.message });
+  }
+});
+
+
+// --- POST endpoint for creating tickets ---
+
+
+// --- POST endpoint for creating tickets ---
+
+// POST endpoint for creating tickets
+app.post('/api/v1/tickets', async (req, res) => {
+  try {
     const { ticket } = req.body;
 
     if (!ticket) {
@@ -115,6 +144,36 @@ app.post('/api/v1/tickets', async (req, res) => {
     res.status(500).json({ error: 'Failed to create ticket' });
   }
 });
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error('Global error handler:', err);
+  res.status(500).json({ error: 'Something went wrong' });
+});
+
+// endpoint for updating tickets
+app.patch('/api/v1/tickets/:id', async (req, res) => {
+  try {
+    const ticketId = req.params.id;
+    const ticketData = req.body.ticket;
+    const comment = req.body.comment;
+
+    if (!ticketId) {
+      return res.status(400).json({ error: 'Ticket ID is required' });
+    }
+    if (!ticketData || Object.keys(ticketData).length === 0) {
+      return res.status(400).json({ error: 'Ticket data is required in the request body' });
+    }
+
+    const updatedTicket = await apiClient.commitTicket(ticketId, ticketData, comment);
+    res.json(updatedTicket);
+  } catch (error) {
+    console.error('Error updating ticket:', error);
+    res.status(500).json({ error: 'Failed to update ticket', details: error.message });
+  }
+});
+
+
 
 // Start server
 const PORT = config.serverPort || 3000;

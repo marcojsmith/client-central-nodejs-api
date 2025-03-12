@@ -1,4 +1,4 @@
- # API Functions Implementation Checklist for HTTP Server - Revised
+# API Functions Implementation Checklist for HTTP Server - Revised
 
 This checklist outlines the functions to be implemented or updated in our Node.js server and API client, based on the Python code examples provided in `CC_API_docs/python-code-examples/`. We will focus on enhancing the existing HTTP endpoints and updating the `apiClient.js` to support more functionalities.
 
@@ -23,24 +23,24 @@ This checklist outlines the functions to be implemented or updated in our Node.j
         *   [x] Add/verify error handling and logging for both the endpoint and the apiClient function.
         *   [x] Test the endpoint to confirm it returns all ticket fields.
 
-3.  [ ] **Implement Ticket Creation - `POST /api/v1/tickets` Endpoint and `createTicket(ticketData)` in `apiClient.js`**:
-    *   [ ] **Purpose**: Implement the function to create new tickets via the API. This will allow users to create new tickets through our server.
-    *   [ ] **Tasks**:
-        *   [ ] Implement the `createTicket(ticketData)` function in `apiClient.js` to send a POST request to `/api/v1/tickets.json` with the provided `ticketData`.
-        *   [ ] Ensure the `POST /api/v1/tickets` endpoint in `server.js` correctly uses `apiClient.createTicket()` to handle ticket creation requests.
-        *   [ ] Implement input validation in the endpoint to validate `ticketData` and ensure required fields are present.
-        *   [ ] Add error handling and proper response formatting for both the endpoint and apiClient function.
+3.  [x] **Implement Ticket Creation - `POST /api/v1/tickets` Endpoint and `createTicket(ticketData)` in `apiClient.js`**:
+    *   [x] **Purpose**: Implement the function to create new tickets via the API. This will allow users to create new tickets through our server.
+    *   [x] **Tasks**:
+        *   [x] Implement the `createTicket(ticketData)` function in `apiClient.js` to send a POST request to `/api/v1/tickets.json` with the provided `ticketData`.
+        *   [x] Ensure the `POST /api/v1/tickets` endpoint in `server.js` correctly uses `apiClient.createTicket()` to handle ticket creation requests.
+        *   [x] Implement input validation in the endpoint to validate `ticketData` and ensure required fields are present.
+        *   [x] Add error handling and proper response formatting for both the endpoint and apiClient function.
         *   [ ] Test ticket creation with valid and invalid data, including boundary cases and error conditions.
 
-4.  [ ] **Implement Ticket Update (Commit) - `PATCH /api/v1/tickets/:id` Endpoint and `commitTicket(ticketId, ticketData, comment)` in `apiClient.js`**:
-    *   [ ] **Purpose**: Implement the ability to update existing tickets, allowing modifications to ticket fields and adding commit comments.
-    *   [ ] **Tasks**:
-        *   [ ] Create a new function `commitTicket(ticketId, ticketData, comment)` in `apiClient.js`.
-        *   [ ] This function should send a PATCH request to `/api/v1/tickets/:id.json` with the `ticketData` for updates and include `comment` in the `ticket_event` for commit comments.
-        *   [ ] Update the `PATCH /api/v1/tickets/:id` endpoint in `server.js` to use `apiClient.commitTicket()` for handling ticket updates.
-        *   [ ] Ensure the endpoint correctly handles `ticketData` and `comment` from the request body.
-        *   [ ] Implement data validation for `ticketData` in the endpoint.
-        *   [ ] Add error handling and response formatting.
+4.  [x] **Implement Ticket Update (Commit) - `PATCH /api/v1/tickets/:id` Endpoint and `commitTicket(ticketId, ticketData, comment)` in `apiClient.js`**:
+    *   [x] **Purpose**: Implement the ability to update existing tickets, allowing modifications to ticket fields and adding commit comments.
+    *   [x] **Tasks**:
+        *   [x] Create a new function `commitTicket(ticketId, ticketData, comment)` in `apiClient.js`.
+        *   [x] This function should send a PATCH request to `/api/v1/tickets/:id.json` with the `ticketData` for updates and include `comment` in the `ticket_event` for commit comments.
+        *   [x] Update the `PATCH /api/v1/tickets/:id` endpoint in `server.js` to use `apiClient.commitTicket()` for handling ticket updates.
+        *   [x] Ensure the endpoint correctly handles `ticketData` and `comment` from the request body.
+        *   [x] Implement data validation for `ticketData` in the endpoint.
+        *   [x] Add error handling and response formatting.
         *   [ ] Test various ticket updates, including different field modifications and adding comments.
 
 5.  [ ] **Implement Add Comment to Ticket - `PATCH /api/v1/tickets/:id` Endpoint (reuse) and `addCommentToTicket(ticketId, description)` in `apiClient.js`**:
