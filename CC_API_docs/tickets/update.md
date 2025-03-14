@@ -1,135 +1,46 @@
-# Tickets API - Updating Tickets
+# Ticket Update API Documentation
 
-## Table of Contents
-- [Introduction](#introduction)
-- [Update Parameters](#update-parameters)
-- [Examples](#examples)
-- [Error Handling](#error-handling)
-
-## Introduction
-
-This document provides detailed information about updating tickets through the API.
-
-## Update Parameters
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `subject` | string | Updated subject (max 255 characters) |
-| `description` | string | Updated description |
-| `priority` | string | Updated priority (low/normal/high) |
-| `status` | string | Updated status (open/closed) |
-| `tags` | array | Updated list of tags |
-| `assignee_id` | integer | Updated assignee ID |
-| `due_date` | datetime | Updated due date |
-
-## Examples
-
-### Basic Update
-
-```http
-PUT /api/v1/tickets/123
+## Basics
+To update a ticket, send an HTTP PATCH request to:
+```
+/api/v1/tickets/<ticket_id>.json?token=<your_api_token>
 ```
 
-Request body:
+## Required Parameters
 
-```json
-{
-  "description": "Updated description",
-  "priority": "high"
-}
-```
+| Key | Example | Description |
+|-----|---------|-------------|
+| `ticket_event[comment]` | "Some comment" | Comment added to the event/post. Can be blank but must be present |
+| `ticket_event[visible_to_customer]` | false | Determines if event is visible to customer |
 
-Response:
+## Optional Parameters
 
-```json
-{
-  "id": 123,
-  "subject": "Example Ticket",
-  "description": "Updated description",
-  "status": "open",
-  "priority": "high",
-  "created_at": "2025-03-07T12:00:00Z",
-  "updated_at": "2025-03-07T12:15:00Z",
-  "tags": []
-}
-```
+### Attachments
+| Key | Example | Description |
+|-----|---------|-------------|
+| `ticket_event[attachments_attributes][x][file]` | `some_file.jpg` | Files to upload as attachments |
+| | `other_file.png` | Use sequential numbers for multiple files |
 
-### Complex Update
+### Ticket Details
+| Key | Description |
+|-----|-------------|
+| `ticket[subject]` | The title/subject of the ticket |
+| `ticket[description]` | Detailed information about the ticket |
 
-```http
-PUT /api/v1/tickets/123
-```
+### Status, Type & Priority
+| Key | Description |
+|-----|-------------|
+| `ticket[status_id]` | ID from Administration > Configuration (Tickets) > Statuses |
+| `ticket[type_id]` | ID from Administration > Configuration (Tickets) > Types |
+| `ticket[priority_id]` | ID from Administration > Configuration (Tickets) > Priorities |
 
-Request body:
+### Custom Fields
+| Key | Example | Description |
+|-----|---------|-------------|
+| `ticket[custom_fields_attributes][x][id]` | 123 | Custom field ID from admin URL |
+| `ticket[custom_fields_attributes][x][values]` | "Need translation" | Value for custom field |
 
-```json
-{
-  "subject": "Updated Subject",
-  "description": "Updated description",
-  "priority": "high",
-  "tags": ["urgent", "bug"],
-  "assignee_id": 456,
-  "due_date": "2025-03-10T12:00:00Z"
-}
-```
-
-Response:
-
-```json
-{
-  "id": 123,
-  "subject": "Updated Subject",
-  "description": "Updated description",
-  "status": "open",
-  "priority": "high",
-  "created_at": "2025-03-07T12:00:00Z",
-  "updated_at": "2025-03-07T12:20:00Z",
-  "tags": ["urgent", "bug"],
-  "assignee": {
-    "id": 456,
-    "name": "John Doe"
-  },
-  "due_date": "2025-03-10T12:00:00Z"
-}
-```
-
-## Error Handling
-
-### Invalid Priority
-
-Response (400 Bad Request):
-
-```json
-{
-  "error": "Validation failed",
-  "messages": {
-    "priority": ["must be one of: low, normal, high"]
-  }
-}
-```
-
-### Invalid Status
-
-Response (400 Bad Request):
-
-```json
-{
-  "error": "Validation failed",
-  "messages": {
-    "status": ["must be one of: open, closed"]
-  }
-}
-```
-
-### Non-existent Ticket
-
-Response (404 Not Found):
-
-```json
-{
-  "error": "Not found",
-  "message": "Ticket not found"
-}
-```
-
-> **Note:** Only the ticket creator or an admin can update tickets.
+### Notification Control
+| Key | Description |
+|-----|-------------|
+| `ticket_event[disable_default_notifications]` | Set to "true" to prevent email notifications (agent-only) |
