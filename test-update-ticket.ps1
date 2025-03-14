@@ -2,7 +2,7 @@
 
 # Define API endpoint and ticket ID
 $apiEndpoint = "http://localhost:3000/api/v1/tickets"
-$ticketId = 626912 # Replace with your ticket ID
+$ticketId = 630308 # Replace with your ticket ID
 
 # Define headers
 $headers = @{
@@ -11,24 +11,40 @@ $headers = @{
     # "Authorization" = "Bearer YOUR_API_TOKEN"
 }
 
-# Define request body
+# Define request body according to API documentation
 $body = @{
-        description = "Updated description via PowerShell Script - PUT Method"
-} | ConvertTo-Json
+    ticket = @{
+        description = "Updated description via PowerShell Script"
+        subject = "Updated Subject via PowerShell"
+    }
+    ticket_event = @{
+        comment = "Updated via PowerShell script"
+        internal = "true"
+        visible_to_customer = "false"
+        disable_default_notifications = "true"
+    }
+} | ConvertTo-Json -Depth 5
 
 try {
-    # Send request
-    $response = Invoke-WebRequest -Uri "$apiEndpoint/$ticketId" -Method Put -Headers $headers -Body $body -ErrorAction Stop
+    # Send request - using PATCH as specified in the API
+    $response = Invoke-WebRequest -Uri "$apiEndpoint/$ticketId" -Method Patch -Headers $headers -Body $body -ErrorAction Stop
 
     # Properly handle the response stream and convert from JSON
-    $responseContent = $response.Content | ConvertFrom-Json
+    $responseContent = $response | ConvertFrom-Json
 
     # Output response
     Write-Host "Response content (JSON):"
-    Write-Host ($responseContent | ConvertTo-Json -Compress)
+    # Write-Host ($responseContent | ConvertTo-Json -Compress)
 
     # Optionally output specific fields from the response, e.g., ticket ID and status
-    Write-Host "Ticket updated successfully. Ticket ID: $($responseContent.id), Status: $($responseContent.status)"
+    Write-Host "Ticket updated successfully."
+    Write-Host "Ticket ID: $($responseContent.id)" 
+    Write-Host "Status: $($responseContent.status)"
+    Write-Host "Subject: $($responseContent.subject)"
+    Write-Host "Description: $($responseContent.description)"
+    Write-Host "Updated At: $($responseContent.updated_at)"
+    Write-Host "Internal: $($responseContent.internal)"
+    Write-Host "Visibile to customer: $($responseContent.visible_to_customer)"
 
 }
 catch {

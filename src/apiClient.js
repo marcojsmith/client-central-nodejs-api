@@ -102,14 +102,38 @@ class ApiClient {
     try {
       const url = `/api/v1/tickets/${ticketId}.json`;
       const fullUrl = this.client.defaults.baseURL + url;
-      console.log('API Request URL:', fullUrl); // Log the full URL
-      const response = await this.client.put(url, {
-        ticket: ticketData,
-        ticket_event: { description: comment }
-      });
+      // console.log('API Request URL:', fullUrl);
+      
+      // Following Python example structure
+      const payload = {
+        ticket: {
+          ...ticketData,
+        },
+        ticket_event: {
+          comment: comment || null,
+          internal: ticketData.internal || false,
+          visible_to_customer: ticketData.visible_to_customer !== false,
+          disable_default_notifications: true
+        }
+      };
+      
+      // Log full request details for debugging
+      console.log('Request URL:', fullUrl);
+      console.log('Request method:', 'PATCH');
+      console.log('Request headers:', this.client.defaults.headers);
+      console.log('Request params:', this.client.defaults.params);
+      console.log('Request body:', JSON.stringify(payload, null, 2));
+      
+      console.log('Sending payload:', JSON.stringify(payload, null, 2));
+      
+      const response = await this.client.put(url, payload);
       return response.data;
     } catch (error) {
-      console.error('Error committing ticket:', error);
+      console.error('API Error Details:', {
+        status: error.response?.status,
+        data: error.response?.data,
+        config: error.config
+      });
       throw new Error('Failed to commit ticket');
     }
   }

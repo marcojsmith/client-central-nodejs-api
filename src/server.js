@@ -126,29 +126,6 @@ app.post('/api/v1/tickets', async (req, res) => {
   }
 });
 
-
-// --- POST endpoint for creating tickets ---
-
-
-// --- POST endpoint for creating tickets ---
-
-// POST endpoint for creating tickets
-app.post('/api/v1/tickets', async (req, res) => {
-  try {
-    const { ticket } = req.body;
-
-    if (!ticket) {
-      return res.status(400).json({ error: 'Ticket data is required' });
-    }
-
-    const result = await apiClient.createTicket(ticket);
-    res.json(result);
-  } catch (error) {
-    console.error('Error creating ticket:', error);
-    res.status(500).json({ error: 'Failed to create ticket' });
-  }
-});
-
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error('Global error handler:', err);
@@ -157,11 +134,18 @@ app.use((err, req, res, next) => {
 
 // endpoint for updating tickets
 app.patch('/api/v1/tickets/:id', async (req, res) => {
+  console.log('Request received for updating ticket ID:', req.params.id);
   try {
     const ticketId = req.params.id;
     const ticketData = req.body.ticket;
-    const comment = req.body.comment;
-
+    const ticketEvent = req.body.ticket_event || {};
+    
+    // Extract ticket event data
+    const comment = ticketEvent.comment;
+    
+    console.log('Updating ticket with:', {
+      ticketData, ticketEvent
+    });
     if (!ticketId) {
       return res.status(400).json({ error: 'Ticket ID is required' });
     }
@@ -170,8 +154,23 @@ app.patch('/api/v1/tickets/:id', async (req, res) => {
     }
 
     const updatedTicket = await apiClient.commitTicket(ticketId, ticketData, comment);
-    res.json(updatedTicket);
+    
+    // Format the response
+    const formattedResponse = {
+      id: updatedTicket.data.id,
+      subject: updatedTicket.data.subject,
+      description: updatedTicket.data.description,
+      status: updatedTicket.data.status?.name,
+      updated_at: updatedTicket.data.updated_at,
+      internal: updatedTicket.data.internal,
+      visible_to_customer: !updatedTicket.data.visible_to_customer
+    };
+    
+    res.json(formattedResponse);
   } catch (error) {
+    console.error('Detailed error:', error);
+    console.error('Request body:', req.body);
+    console.error('Request params:', req.params);
     console.error('Error updating ticket:', error);
     res.status(500).json({ error: 'Failed to update ticket', details: error.message });
   }
