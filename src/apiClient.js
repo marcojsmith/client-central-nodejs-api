@@ -24,7 +24,7 @@ class ApiClient {
     try {
       const params = {
         page: page, // Page number
-        workspace: config.server.workspaceIdFilter, // workspaceId filter
+        workspaceId: config.server.workspaceIdFilter, // workspaceId filter
         ...queryParams, // Merge queryParams
         select: 'description,status.name,priority.name,status.id,priority.id,id,subject,customer_user.name,customer_user.id,created_by_user.id,assignee.name,account.name,assignee.id,account.id,related_module.name,related_module.id,type.name,type.id,created_at,updated_at',
       };
@@ -52,20 +52,26 @@ class ApiClient {
   }
 
   // --- Internal function to fetch ticket details ---
-  async _fetchTicketDetails(id, workspaceId, params = {}) { // params is now optional
+  async _fetchTicketDetails(id, workspaceId, params = {}) {
     try {
-      const requestParams = { ...params }; // Start with any provided params
+      const requestParams = { ...params };
       if (workspaceId) {
-        requestParams.workspace_id = workspaceId; // Add workspaceId if provided
+        requestParams.workspaceId = workspaceId; // Add workspaceId if provided
       }
       const response = await this.client.get(`/api/v1/tickets/${id}.json`, { params: requestParams });
-      return response.data;
+      return response?.data || null;
     } catch (error) {
-      console.error('Error fetching ticket details:', error);
+      console.error('API Error Details:', {
+        status: error.response?.status,
+        data: error.response?.data,
+        config: error.config
+      });
+      if (error.response?.status === 404) {
+        return null;
+      }
       throw new Error('Failed to fetch ticket details');
     }
   }
-
 
   // Get details of a specific ticket
   async getTicketById(id, workspaceId) {
@@ -76,7 +82,6 @@ class ApiClient {
   async getAllTicketFieldsById(id, workspaceId) {
     return this._fetchTicketDetails(id, workspaceId);
   }
-
 
   // Create a new ticket
   async createTicket(ticketData) {
@@ -92,7 +97,6 @@ class ApiClient {
     }
   }
 
-  
   // Update an existing ticket (commit)
   async commitTicket(ticketId, ticketData, comment) {
     try {
@@ -109,7 +113,6 @@ class ApiClient {
       throw new Error('Failed to commit ticket');
     }
   }
-
 }
 
 module.exports = ApiClient;

@@ -55,7 +55,11 @@ app.get('/api/v1/tickets', async (req, res) => {
 app.get('/api/v1/tickets/:id', async (req, res) => {
   try {
     console.log('Request received for ticket ID:', req.params.id); // Log request parameters
-    const apiFullTicket = await apiClient.getTicketById(req.params.id, config.server.workspaceIdFilter);
+    const ticket = await apiClient.getTicketById(req.params.id, config.server.workspaceIdFilter);
+      if (!ticket) {
+        return res.status(404).json({ error: 'Ticket not found' });
+      }
+
     // Extract only the required fields
     /* const ticket = {
       ticketId: apiFullTicket.data.id,
@@ -78,7 +82,7 @@ app.get('/api/v1/tickets/:id', async (req, res) => {
       createdAt: apiFullTicket.data.created_at, // Added created_at
       updatedAt: apiFullTicket.data.updated_at, // Added updated_at
     }; */
-    res.json(apiFullTicket.data);
+    res.json(ticket);
   } catch (error) {
     console.error('Error getting ticket details:', error);
     res.status(500).json({ error: 'Failed to get ticket details' });
