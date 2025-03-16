@@ -18,12 +18,32 @@ app.use(express.json());
 app.get('/api/v1/tickets', async (req, res) => {
   try {
     const { page = 1,  ...queryParams } = req.query; // Extract page and queryParams
-    // Get list of tickets from API
-    const fullTickets = await apiClient.getTickets(page, queryParams);
-    // Extract required fields for each ticket from .data
-    const tickets = fullTickets.data.map(fullTicket => {
+    
+    // Log request info before making API call
+    console.log('Fetching tickets with:', {
+      page,
+      queryParams,
+      workspaceId: config.server.workspaceIdFilter
+    });
+
+    // Fetch tickets from API
+    const response = await apiClient.getTickets(page, queryParams);
+    
+    // Validate response structure  before processing
+    if (!response?.data) {
+      console.error('Invalid response structure:', {
+        received: fullTickets,
+        expectedProperty: 'data'
+      });
+      return res.status(500).json({ 
+        error: 'Invalid response from API'
+      });
+    }
+
+    const tickets = response.data.map(fullTicket => {
       return {
         ticketId: fullTicket.id,
+        workspaceId: fullTicket.workspace.id,
         ticketDescription: fullTicket.description,
         ticketSubject: fullTicket.subject,
         owner: fullTicket.customer_user?.id, // Optional chaining on customer_user
@@ -44,7 +64,20 @@ app.get('/api/v1/tickets', async (req, res) => {
         updatedAt: fullTicket.updated_at,
       };
     });
-    res.json({ tickets }); // Return tickets in an object
+
+    // Return response with tickets and pagination information
+    res.json({
+      tickets,
+      // Pagination information from the API:
+      // - currentPage: Current page number
+      // - totalPages: Total number of pages available
+      // - hasMore: Whether there are more pages after this one
+      pagination: {
+        currentPage: response.page,
+        totalPages: response.total_pages,
+        hasMore: response.more
+      }
+    });
   } catch (error) {
     console.error('Error getting tickets list:', error);
     res.status(500).json({ error: 'Failed to get tickets list' });
@@ -59,29 +92,7 @@ app.get('/api/v1/tickets/:id', async (req, res) => {
       if (!ticket) {
         return res.status(404).json({ error: 'Ticket not found' });
       }
-
-    // Extract only the required fields
-    /* const ticket = {
-      ticketId: apiFullTicket.data.id,
-      ticketDescription: apiFullTicket.data.description, // Corrected to description
-      ticketSubject: apiFullTicket.data.subject, // ADDED: ticketSubject field
-      owner: apiFullTicket.data.customer_user.id,
-      ownerName: apiFullTicket.data.customer_user.name,
-      assignee: apiFullTicket.data.assignee.id,
-      assigneeName: apiFullTicket.data.assignee.name,
-      relatedModule: apiFullTicket.data.related_module.name, // Added relatedModule
-      status: apiFullTicket.data.status.name,
-      priority: apiFullTicket.data.priority.name,
-      statusId: apiFullTicket.data.status?.id, // Use optional chaining
-      priorityId: apiFullTicket.data.priority?.id, // Use optional chaining
-      accountName: apiFullTicket.data.account.name,
-      ticketType: apiFullTicket.data.type?.name, // Corrected to type?.name
-      ticketTypeId: apiFullTicket.data.type?.id, // Added ticketType id
-      relatedModuleId: apiFullTicket.data.related_module.id, // Added relatedModule id
-      account: apiFullTicket.data.account.id,
-      createdAt: apiFullTicket.data.created_at, // Added created_at
-      updatedAt: apiFullTicket.data.updated_at, // Added updated_at
-    }; */
+      
     res.json(ticket);
   } catch (error) {
     console.error('Error getting ticket details:', error);

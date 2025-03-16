@@ -1,15 +1,14 @@
 # Active Context
 
 ## Current Task
-Create a new API endpoint that returns all fields for a specific ticket.
+Update the README.md file based on current application.
 
 ## Plan
-1. Clone the existing `/api/v1/tickets/:id` endpoint in `server.js`.
-2. Modify the new endpoint path to `/api/v1/tickets/:id/full`.
-3. Remove field selection in the new endpoint to return all fields.
-4. Test the new endpoint.
-5. Update API documentation.
-6. Update memory bank.
+1.  Review the current README.md file.
+2.  Review the current application code (`server.js`, `apiClient.js`, `config.js`, `errors.js`).
+3.  Determine the differences and provide a plan for updating the README.md file.
+4.  `README.md` file has been updated by rewriting the file using `write_to_file` tool.
+5.  Update memory bank with changes.
 
 ## Next Steps
-Implement the new API endpoint in `code` mode.
+Update memory bank with changes.

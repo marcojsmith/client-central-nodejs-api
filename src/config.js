@@ -1,5 +1,17 @@
 require('dotenv').config();
 
+// Helper function to parse workspace IDs from environment variable
+function parseWorkspaceIds(envValue) {
+  if (!envValue) return null;
+  
+  // Split by comma and convert to array of numbers
+  return envValue.split(',')
+    .map(id => id.trim())
+    .filter(id => id !== '')
+    .map(Number)  // Convert to numbers
+    .filter(id => !isNaN(id));  // Remove any invalid numbers
+}
+
 module.exports = {
   api: {
     baseUrl: process.env.API_BASE_URL,
@@ -12,13 +24,12 @@ module.exports = {
     port: parseInt(process.env.SERVER_PORT) || 3000,
     cors: {
       allowedOrigins: process.env.CORS_ALLOWED_ORIGINS?.split(',') || ['*']
-    }
-,
-      workspaceIdFilter: process.env.WORKSPACE_ID_FILTER
+    },
+    workspaceIdFilter: parseWorkspaceIds(process.env.WORKSPACE_ID_FILTER)
   },
   debug: {
     envWorkspaceIdFilter: process.env.WORKSPACE_ID_FILTER,
-      workspaceIdFilter: process.env.WORKSPACE_ID_FILTER
+    parsedWorkspaceIds: parseWorkspaceIds(process.env.WORKSPACE_ID_FILTER)
   },
   statuses: {
     61: 'In Testing'

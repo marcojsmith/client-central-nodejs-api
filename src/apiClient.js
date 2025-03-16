@@ -19,92 +19,153 @@ class ApiClient {
     });
   }
 
-  // Get list of tickets
+  // Helper method to format workspace filter query
+  _formatWorkspaceFilter(workspaceId, context = '') {
+    if (!workspaceId) {
+      return null;
+    }
+
+    // Handle both single workspace ID and arrays of workspace IDs
+    let filterQuery;
+    if (Array.isArray(workspaceId)) {
+      // Use array format for multiple workspace filter
+      filterQuery = `workspace.id IN [${workspaceId.join(',')}]`;
+
+      // Log filter creation for debugging
+      console.log('Creating multi-workspace filter:', {
+        workspaceIds: workspaceId,
+        filterSyntax: filterQuery,
+        context
+      });
+    } else {
+      // Use equals for single workspace
+      filterQuery = `workspace.id = ${workspaceId}`;
+
+      // Log filter creation for debugging
+      console.log('Creating single workspace filter:', {
+        workspaceId,
+        filterSyntax: filterQuery,
+        context
+      });
+    }
+
+    return filterQuery;
+  }
+
+  // --- Get list of tickets ---
   async getTickets(page, queryParams = {}) {
+    // Initialize params at the beginning of the method
+    const params = {
+      page: page,
+      select: 'workspace,description,status.name,priority.name,status.id,priority.id,id,subject,customer_user.name,customer_user.id,created_by_user.id,assignee.name,account.name,assignee.id,account.id,related_module.name,related_module.id,type.name,type.id,created_at,updated_at'
+    };
+
     try {
-      const params = {
-        page: page, // Page number
-        workspaceId: config.server.workspaceIdFilter, // workspaceId filter
-        ...queryParams, // Merge queryParams
-        select: 'description,status.name,priority.name,status.id,priority.id,id,subject,customer_user.name,customer_user.id,created_by_user.id,assignee.name,account.name,assignee.id,account.id,related_module.name,related_module.id,type.name,type.id,created_at,updated_at',
-      };
+      // Add workspace filter using correct format
+      const workspaceId = config.server.workspaceIdFilter;
+      if (workspaceId) {
+        params['filter'] = this._formatWorkspaceFilter(workspaceId, 'getTickets');
+      }
 
+      // Add any additional query parameters
+      Object.assign(params, queryParams);
 
-      const url = '/api/v1/tickets.json?';
-      const fullUrl = this.client.defaults.baseURL + url + new URLSearchParams(params).toString();
-      console.log('API Request URL:', fullUrl); // Log the full URL
-      const response = await this.client.get(url, { params });
+      // Log request details for debugging
+      console.log('Request Details:', {
+        url: '/api/v1/tickets.json',
+        params: params,
+        filterType: Array.isArray(workspaceId) ? 'array' : 'single'
+      });
 
-      // Extract pagination information from response data
-      const pagination = {
-        responsePage: response.data.page,
-        more: response.data.more,
-        total_pages: response.data.total_pages,
-      };
+      const response = await this.client.get('/api/v1/tickets.json', { params });
 
-      console.log('Pagination Info:', pagination); // Log pagination information
+      // Log response details
+      if (response.data) {
+        console.log('Response Info:', {
+          total: response.data.total_pages,
+          page: response.data.page,
+          hasMore: response.data.more
+        });
+      }
 
-      return response.data
+      return response.data;
     } catch (error) {
-      console.error('Error getting tickets:', error);
-      throw new Error('Failed to get tickets');
+      console.error('Error Details:', {
+        method: 'getTickets',
+        message: error.message,
+        status: error.response?.status,
+        errors: error.response?.data?.errors,
+        errorData: error.response?.data,
+        requestParams: params
+      });
+      throw error;
     }
   }
 
-  // --- Internal function to fetch ticket details ---
-  async _fetchTicketDetails(id, workspaceId, params = {}) {
+  // --- Get details of a specific ticket ---
+  async getTicketById(id, workspaceId) {
     try {
-      const requestParams = { ...params };
+      const params = {
+        select: 'description,status.name,priority.name,status.id,priority.id,id,subject,customer_user.name,customer_user.id,created_by_user.id,assignee.name,account.name,assignee.id,account.id,related_module.name,related_module.id,type.name,type.id,created_at,updated_at'
+      };
+
       if (workspaceId) {
-        requestParams.workspaceId = workspaceId; // Add workspaceId if provided
+        params['filter'] = this._formatWorkspaceFilter(workspaceId, 'getTicketById');
       }
-      const response = await this.client.get(`/api/v1/tickets/${id}.json`, { params: requestParams });
+
+      const response = await this.client.get(`/api/v1/tickets/${id}.json`, { params });
       return response?.data || null;
     } catch (error) {
-      console.error('API Error Details:', {
+      console.error('API Error:', {
+        method: 'getTicketById',
         status: error.response?.status,
         data: error.response?.data,
-        config: error.config
+        filter: params.filter
       });
       if (error.response?.status === 404) {
         return null;
       }
-      throw new Error('Failed to fetch ticket details');
+      throw error;
     }
   }
 
-  // Get details of a specific ticket
-  async getTicketById(id, workspaceId) {
-    return this._fetchTicketDetails(id, workspaceId, {  select: 'description,status.name,priority.name,status.id,priority.id,id,subject,customer_user.name,customer_user.id,created_by_user.id,assignee.name,account.name,assignee.id,account.id,related_module.name,related_module.id,type.name,type.id,created_at,updated_at' });
-  }
-
-  // Get details of a specific ticket with all fields
+  // --- Get full ticket details ---
   async getAllTicketFieldsById(id, workspaceId) {
-    return this._fetchTicketDetails(id, workspaceId);
+    try {
+      const params = {};
+      if (workspaceId) {
+        params['filter'] = this._formatWorkspaceFilter(workspaceId, 'getAllTicketFieldsById');
+      }
+
+      const response = await this.client.get(`/api/v1/tickets/${id}.json`, { params });
+      return response.data;
+    } catch (error) {
+      console.error('API Error:', {
+        method: 'getAllTicketFieldsById',
+        ticketId: id,
+        workspaceId,
+        filter: params.filter,
+        error: error.message,
+        errorData: error.response?.data
+      });
+      throw error;
+    }
   }
 
-  // Create a new ticket
+  // --- Create a new ticket ---
   async createTicket(ticketData) {
     try {
-      const url = '/api/v1/tickets.json';
-      const fullUrl = this.client.defaults.baseURL + url;
-      console.log('API Request URL:', fullUrl); // Log the full URL
-      const response = await this.client.post(url, { ticket: ticketData });
+      const response = await this.client.post('/api/v1/tickets.json', { ticket: ticketData });
       return response.data;
     } catch (error) {
       console.error('Error creating ticket:', error);
-      throw new Error('Failed to create ticket');
+      throw error;
     }
   }
 
-  // Update an existing ticket (commit)
+  // --- Update an existing ticket (commit) ---
   async commitTicket(ticketId, ticketData, comment) {
     try {
-      const url = `/api/v1/tickets/${ticketId}.json`;
-      const fullUrl = this.client.defaults.baseURL + url;
-      // console.log('API Request URL:', fullUrl);
-      
-      // Following Python example structure
       const payload = {
         ticket: {
           ...ticketData,
@@ -116,25 +177,20 @@ class ApiClient {
           disable_default_notifications: true
         }
       };
-      
-      // Log full request details for debugging
-      console.log('Request URL:', fullUrl);
-      console.log('Request method:', 'PATCH');
-      console.log('Request headers:', this.client.defaults.headers);
-      console.log('Request params:', this.client.defaults.params);
-      console.log('Request body:', JSON.stringify(payload, null, 2));
-      
-      console.log('Sending payload:', JSON.stringify(payload, null, 2));
-      
-      const response = await this.client.put(url, payload);
+
+      console.log('Update request:', {
+        url: `/api/v1/tickets/${ticketId}.json`,
+        payload: payload
+      });
+
+      const response = await this.client.put(`/api/v1/tickets/${ticketId}.json`, payload);
       return response.data;
     } catch (error) {
-      console.error('API Error Details:', {
+      console.error('Update Error:', {
         status: error.response?.status,
-        data: error.response?.data,
-        config: error.config
+        data: error.response?.data
       });
-      throw new Error('Failed to commit ticket');
+      throw error;
     }
   }
 }
