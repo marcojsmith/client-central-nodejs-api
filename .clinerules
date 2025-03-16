@@ -1,0 +1,3 @@
+For this application we are creating a nodejs interface for accessing the Client Central ticketing system API.
+./CC_API_docs/ contains reference documentation on how to interact with the Client Central ticketing system API.
+./CC_API_docs/python-code-examples/ includes python reference files for a working application that interfaces with the Client Central API.
