@@ -21,8 +21,10 @@ class ApiClient {
     try {
       return await this.tickets.getTickets(page, queryParams);
     } catch (error) {
+      /*
       console.error('Failed to get tickets:', error.details || error);
       throw error;
+      */
     }
   }
 
@@ -35,8 +37,10 @@ class ApiClient {
     try {
       return await this.tickets.getTicketById(id, workspaceId);
     } catch (error) {
+      /*
       console.error('Failed to get ticket:', error.details || error);
       throw error;
+      */
     }
   }
 
@@ -49,8 +53,10 @@ class ApiClient {
     try {
       return await this.tickets.getAllTicketFieldsById(id, workspaceId);
     } catch (error) {
+      /*
       console.error('Failed to get ticket fields:', error.details || error);
       throw error;
+      */
     }
   }
 
@@ -62,8 +68,10 @@ class ApiClient {
     try {
       return await this.tickets.createTicket(ticketData);
     } catch (error) {
+      /*
       console.error('Failed to create ticket:', error.details || error);
       throw error;
+      */
     }
   }
 
@@ -77,8 +85,10 @@ class ApiClient {
     try {
       return await this.tickets.commitTicket(ticketId, ticketData, comment);
     } catch (error) {
+      /*
       console.error('Failed to update ticket:', error.details || error);
       throw error;
+      */
     }
   }
 }

@@ -1,131 +1,41 @@
-# Tickets API - Creating Tickets
+# Creating Tickets
 
-## Table of Contents
-- [Introduction](#introduction)
-- [Required Fields](#required-fields)
-- [Optional Fields](#optional-fields)
-- [Examples](#examples)
-- [Error Handling](#error-handling)
+## Basics
 
-## Introduction
+A ticket can be created with a HTTP POST request to the following endpoint:
 
-This document provides detailed information about creating tickets through the API.
-
-## Required Fields
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `subject` | string | Ticket subject (max 255 characters) |
-| `description` | string | Detailed ticket description |
-
-## Optional Fields
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `priority` | string | Priority level (low/normal/high) |
-| `tags` | array | List of tags |
-| `assignee_id` | integer | ID of user to assign ticket to |
-| `due_date` | datetime | Due date for the ticket |
-
-## Examples
-
-### Basic Ticket Creation
-
-```http
-POST /api/v1/tickets
+```
+/api/v1/tickets.json?token=<your_api_token>
 ```
 
-Request body:
+## Required Parameters
 
-```json
-{
-  "subject": "New Ticket",
-  "description": "This is a new ticket"
-}
-```
+| Key | Example | Description |
+|-----|---------|-------------|
+| `ticket[workspace_id]` | 4 | The ID of the workspace the ticket should be created in |
+| `ticket[project_id]` | 2 | The ID of the project this ticket should be associated with. **Note:** This parameter is only required if multiple projects are linked to the workspace. To get the project ID:<br>1. Go to Administration > Configuration (Tickets)<br>2. Select the project<br>3. The ID will be in the URL: `.../admin/accounts/.../ticket_projects/2/edit` |
+| `ticket[subject]` | "Some subject" | The title/subject of the ticket |
+| `ticket[description]` | "Some description" | More info about the ticket |
 
-Response:
+## Optional Parameters
 
-```json
-{
-  "id": 125,
-  "subject": "New Ticket",
-  "description": "This is a new ticket",
-  "status": "open",
-  "priority": "normal",
-  "created_at": "2025-03-07T12:15:00Z",
-  "updated_at": "2025-03-07T12:15:00Z",
-  "tags": []
-}
-```
+| Key | Description |
+|-----|-------------|
+| `ticket[status_id]` | The ID of the ticket status. To get the status ID:<br>1. Go to Administration > Configuration (Tickets) > Statuses (tab)<br>2. Select a status<br>3. The ID will be in the URL: `.../admin/accounts/.../ticket_statuses/13/edit` |
+| `ticket[type_id]` | The ID of the ticket type. To get the type ID:<br>1. Go to Administration > Configuration (Tickets) > Types (tab)<br>2. Select a type<br>3. The ID will be in the URL: `.../admin/accounts/.../ticket_types/8/edit` |
+| `ticket[priority_id]` | The ID of the ticket priority. To get the priority ID:<br>1. Go to Administration > Configuration (Tickets) > Priorities (tab)<br>2. Select a priority<br>3. The ID will be in the URL: `.../admin/accounts/.../ticket_priorities/17/edit` |
+| `ticket[attachments_attributes][x][file]` | Files to be uploaded as attachments. Example:<br>`ticket[attachments_attributes][0][file] = some_file.jpg`<br>`ticket[attachments_attributes][1][file] = other_file.png` |
+| `ticket[custom_fields_attributes][x][id]`<br>`ticket[custom_fields_attributes][x][values]` | Custom field values. Example:<br>`ticket[custom_field_attributes][0][id] = 123`<br>`ticket[custom_field_attributes][0][values] = "Need translation"`<br>`ticket[custom_field_attributes][1][id] = 246`<br>`ticket[custom_field_attributes][1][values] = true`<br>**Note:** The 0 and 1 are arbitrary numbers. Get custom field IDs from the URL when administering custom fields. |
+| `ticket[disable_default_notifications]` | If set to "true", email notifications will not be sent out. **Note:** This can only be used by ticket agents. Useful for synchronizing events with external ticket systems or performing mass updates. |
 
-### Ticket with Additional Fields
+## Exploring Parameters
 
-```http
-POST /api/v1/tickets
-```
+While our API documentation is limited, you can explore parameters using browser developer tools:
 
-Request body:
+1. Open the new ticket screen
+2. Open Chrome Developer Tools (Right Click > Inspect) and go to the Network tab
+3. In the create ticket screen, change any field (e.g., ticket type)
+4. In the Network tab, click the "tickets" request
+5. Scroll down to view the form data showing all current parameters
 
-```json
-{
-  "subject": "Urgent Issue",
-  "description": "This needs immediate attention",
-  "priority": "high",
-  "tags": ["urgent", "bug"],
-  "assignee_id": 456,
-  "due_date": "2025-03-10T12:00:00Z"
-}
-```
-
-Response:
-
-```json
-{
-  "id": 126,
-  "subject": "Urgent Issue",
-  "description": "This needs immediate attention",
-  "status": "open",
-  "priority": "high",
-  "created_at": "2025-03-07T12:20:00Z",
-  "updated_at": "2025-03-07T12:20:00Z",
-  "tags": ["urgent", "bug"],
-  "assignee": {
-    "id": 456,
-    "name": "John Doe"
-  },
-  "due_date": "2025-03-10T12:00:00Z"
-}
-```
-
-## Error Handling
-
-### Missing Required Fields
-
-Response (400 Bad Request):
-
-```json
-{
-  "error": "Validation failed",
-  "messages": {
-    "subject": ["can't be blank"],
-    "description": ["can't be blank"]
-  }
-}
-```
-
-### Invalid Field Values
-
-Response (400 Bad Request):
-
-```json
-{
-  "error": "Validation failed",
-  "messages": {
-    "priority": ["must be one of: low, normal, high"],
-    "due_date": ["must be a future date"]
-  }
-}
-```
-
-> **Note:** All timestamps are in UTC format.
+**Note:** You shouldn't send all parameters - only include the ones you want to set.

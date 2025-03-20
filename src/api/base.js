@@ -32,12 +32,19 @@ class BaseApiClient {
       response => response,
       error => {
         // Log error details
+        /*
         console.error('API Request Failed:', {
           url: error.config?.url,
           method: error.config?.method,
           status: error.response?.status,
           data: error.response?.data
         });
+
+        // Log validation errors if present
+        if (error.response?.data?.errors) {
+          console.error('Validation Errors:', JSON.stringify(error.response.data.errors, null, 2));
+        } 
+        */
         return Promise.reject(error);
       }
     );
@@ -90,12 +97,17 @@ class BaseApiClient {
       requestConfig: {
         url: error.config?.url,
         method: error.config?.method,
-        params: error.config?.params
+        /* params: error.config?.params */
       },
       ...additionalInfo
     };
 
     console.error('API Error:', errorDetails);
+
+    // Log validation errors if present
+    if (error.response?.data?.errors) {
+      console.error('Validation Errors:', JSON.stringify(error.response.data.errors, null, 2));
+    }
 
     // Add request details to error object for better debugging
     error.details = errorDetails;
